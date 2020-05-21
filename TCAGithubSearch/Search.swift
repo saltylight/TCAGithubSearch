@@ -27,9 +27,10 @@ struct SearchEnvironment {
 }
 
 let searchReducer = Reducer<SearchState, SearchAction, SearchEnvironment> { state, action, environment in
+    struct SearchUserId: Hashable {}
+
     switch action {
     case let .searchQueryChanged(query):
-        struct SearchUserId: Hashable {}
         state.searchQuery = query
 
         guard !query.isEmpty else {
@@ -46,7 +47,6 @@ let searchReducer = Reducer<SearchState, SearchAction, SearchEnvironment> { stat
             .cancellable(id: SearchUserId(), cancelInFlight: true)
 
     case let .usersResponse(.success(users)):
-        struct UsersRepoCountId: Hashable {}
 
         state.users = users
 
@@ -57,7 +57,7 @@ let searchReducer = Reducer<SearchState, SearchAction, SearchEnvironment> { stat
                 .catchToEffect()
                 .map { SearchAction.updateUser($0, index) }
             })
-            .cancellable(id: UsersRepoCountId(), cancelInFlight: true)
+            .cancellable(id: SearchUserId(), cancelInFlight: true)
 
     case let .usersResponse(.failure(error)):
         return .none
