@@ -7,8 +7,8 @@
 //
 
 import UIKit
-import SwiftUI
 import ComposableArchitecture
+import SwiftUI
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
@@ -25,7 +25,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             store: Store(
                 initialState: SearchState(),
                 reducer: searchReducer.debug(),
-                environment: SearchEnvironment()
+                environment: SearchEnvironment(
+                    githubClient: GithubClient.live,
+                    mainQueue: DispatchQueue.main.eraseToAnyScheduler()
+                )
             )
         )
 

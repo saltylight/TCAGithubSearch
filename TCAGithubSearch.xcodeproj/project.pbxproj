@@ -17,6 +17,7 @@
 		080D0ECE246E728D00B07CB6 /* ComposableArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = 080D0ECD246E728D00B07CB6 /* ComposableArchitecture */; };
 		080D0ED0246E752600B07CB6 /* Search.swift in Sources */ = {isa = PBXBuildFile; fileRef = 080D0ECF246E752600B07CB6 /* Search.swift */; };
 		080D0ED224721F1A00B07CB6 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 080D0ED124721F1A00B07CB6 /* User.swift */; };
+		080D0ED52476111900B07CB6 /* KingfisherSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 080D0ED42476111900B07CB6 /* KingfisherSwiftUI */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -50,6 +51,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				080D0ED52476111900B07CB6 /* KingfisherSwiftUI in Frameworks */,
 				080D0ECE246E728D00B07CB6 /* ComposableArchitecture in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -133,6 +135,7 @@
 			name = TCAGithubSearch;
 			packageProductDependencies = (
 				080D0ECD246E728D00B07CB6 /* ComposableArchitecture */,
+				080D0ED42476111900B07CB6 /* KingfisherSwiftUI */,
 			);
 			productName = TCAGithubSearch;
 			productReference = 080D0EA7246E715500B07CB6 /* TCAGithubSearch.app */;
@@ -186,6 +189,7 @@
 			mainGroup = 080D0E9E246E715500B07CB6;
 			packageReferences = (
 				080D0ECC246E728D00B07CB6 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */,
+				080D0ED32476111900B07CB6 /* XCRemoteSwiftPackageReference "Kingfisher" */,
 			);
 			productRefGroup = 080D0EA8246E715500B07CB6 /* Products */;
 			projectDirPath = "";
@@ -499,6 +503,14 @@
 				minimumVersion = 0.1.4;
 			};
 		};
+		080D0ED32476111900B07CB6 /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/onevcat/Kingfisher";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.14.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -506,6 +518,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 080D0ECC246E728D00B07CB6 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */;
 			productName = ComposableArchitecture;
+		};
+		080D0ED42476111900B07CB6 /* KingfisherSwiftUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 080D0ED32476111900B07CB6 /* XCRemoteSwiftPackageReference "Kingfisher" */;
+			productName = KingfisherSwiftUI;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
