@@ -13,12 +13,15 @@ import Combine
 struct SearchState: Equatable {
     var searchQuery = ""
     var users: [User] = []
+    var nextUrl: URL?
 }
 
-enum SearchAction: Equatable {
+enum SearchAction {
     case searchQueryChanged(String)
-    case usersResponse(Result<[User], GithubClient.Failure>)
+    case getNextUsers
+    case usersResponse(Result<([User], URL?), GithubClient.Failure>)
     case updateUser(Result<User, GithubClient.Failure>, _ index: Int)
+    case appendUsers(Result<([User], URL?), GithubClient.Failure>)
 }
 
 struct SearchEnvironment {
@@ -46,9 +49,25 @@ let searchReducer = Reducer<SearchState, SearchAction, SearchEnvironment> { stat
             .map(SearchAction.usersResponse)
             .cancellable(id: SearchUserId(), cancelInFlight: true)
 
-    case let .usersResponse(.success(users)):
+    case .getNextUsers:
+        guard let nextUrl = state.nextUrl else {
+            return .none
+        }
+
+        return environment.githubClient
+            .getNextUsers(nextUrl)
+            .receive(on: environment.mainQueue)
+            .catchToEffect()
+            .debounce(id: SearchUserId(), for: 0.3, scheduler: environment.mainQueue)
+            .map(SearchAction.appendUsers)
+            .cancellable(id: SearchUserId(), cancelInFlight: true)
+
+
+    case let .usersResponse(.success((users, nextUrl))):
+        struct UsersRepoCountId: Hashable {}
 
         state.users = users
+        state.nextUrl = nextUrl
 
         return Effect.merge(users.enumerated().map { index, user in
             environment.githubClient
@@ -57,7 +76,7 @@ let searchReducer = Reducer<SearchState, SearchAction, SearchEnvironment> { stat
                 .catchToEffect()
                 .map { SearchAction.updateUser($0, index) }
             })
-            .cancellable(id: SearchUserId(), cancelInFlight: true)
+//            .cancellable(id: UsersRepoCountId(), cancelInFlight: true)
 
     case let .usersResponse(.failure(error)):
         return .none
@@ -68,6 +87,21 @@ let searchReducer = Reducer<SearchState, SearchAction, SearchEnvironment> { stat
         return .none
 
     case let .updateUser(.failure(error), _):
+        return .none
+
+    case let .appendUsers(.success((users, nextUrl))):
+        state.users.append(contentsOf: users)
+        state.nextUrl = nextUrl
+
+        return Effect.merge(users.enumerated().map { index, user in
+            environment.githubClient
+                .getUser(user.name)
+                .receive(on: environment.mainQueue)
+                .catchToEffect()
+                .map { SearchAction.updateUser($0, index) }
+            })
+//            .cancellable(id: UsersRepoCountId(), cancelInFlight: true)
+    case let .appendUsers(.failure(error)):
         return .none
     }
 }

@@ -26,7 +26,8 @@ struct User: Equatable, Decodable {
 }
 
 struct GithubClient {
-    var searchUsers: (String) -> Effect<[User], Failure>
+    var searchUsers: (String) -> Effect<([User], URL?), Failure>
+    var getNextUsers: (URL) -> Effect<([User], URL?), Failure>
     var getUser: (String) -> Effect<User, Failure>
 
     struct Failure: Error, Equatable {}
@@ -40,11 +41,41 @@ extension GithubClient {
             }
             components.queryItems = [URLQueryItem(name: "q", value: query)]
 
-            return URLSession.shared.dataTaskPublisher(for: components.url!)
+            let publisher = URLSession.shared.dataTaskPublisher(for: components.url!)
+                .share()
+
+            let getNextURL = publisher
+                .map { _, response in
+                    fetchNextURL(from: response)
+                }
+                .mapError { _ in Failure() }
+
+            let getUsers = publisher
                 .map { data, _ in data }
                 .decode(type: SearchUserResponse.self, decoder: JSONDecoder())
                 .map(\.items)
                 .mapError { _ in Failure() }
+
+            return getUsers.zip(getNextURL)
+                .eraseToEffect()
+        },
+        getNextUsers: { url in
+            let publisher = URLSession.shared.dataTaskPublisher(for: url)
+                            .share()
+
+            let getNextURL = publisher
+                .map { _, response in
+                    fetchNextURL(from: response)
+                }
+                .mapError { _ in Failure() }
+
+            let getUsers = publisher
+                .map { data, _ in data }
+                .decode(type: SearchUserResponse.self, decoder: JSONDecoder())
+                .map(\.items)
+                .mapError { _ in Failure() }
+
+            return getUsers.zip(getNextURL)
                 .eraseToEffect()
         },
         getUser: { userName in
@@ -59,6 +90,16 @@ extension GithubClient {
                 .eraseToEffect()
         }
     )
+
+    static func fetchNextURL(from response: URLResponse) -> URL? {
+        guard let response = response as? HTTPURLResponse,
+            let value = response.value(forHTTPHeaderField: "Link") else { return nil }
+        let links = value.split(separator: ",").map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+        if let nextURLString = links.filter({ $0.contains("rel=\"next") }).first?.slice(from: "<", to: ">") {
+            return URL(string: nextURLString)
+        }
+        return nil
+    }
 }
 
 extension User {
@@ -69,3 +110,14 @@ extension User {
         case repoCount = "public_repos"
     }
 }
+
+extension String {
+    func slice(from: String, to: String) -> String? {
+        (range(of: from)?.upperBound).flatMap { substringFrom in
+            (range(of: to, range: substringFrom..<endIndex)?.lowerBound).map { substringTo in
+                String(self[substringFrom..<substringTo])
+            }
+        }
+    }
+}
+

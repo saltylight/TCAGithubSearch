@@ -49,6 +49,11 @@ struct SearchView: View {
                                     Text(user.repoCountTitle)
                                 }
                             }
+                            .onAppear {
+                                if user == viewStore.users.last {
+                                    viewStore.send(SearchAction.getNextUsers)
+                                }
+                            }
                         }
                     }
                 }
