@@ -7,28 +7,28 @@
 //
 
 import XCTest
+import ComposableArchitecture
 @testable import TCAGithubSearch
 
 class TCAGithubSearchTests: XCTestCase {
-
-    override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-    }
-
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-    }
-
-    func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-    }
-
-    func testPerformanceExample() throws {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
-        }
-    }
-
+//    let scheduler = DispatchQueue.testScheduler
+//
+//    lazy var environment = SearchEnvironment(
+//        githubClient: .unimplemented,
+//        mainQueue: AnyScheduler(self.scheduler)
+//    )
+//
+//    func testSearchAndClearQuery() {
+//        let store = TestStore(
+//            initialState: .init(),
+//            reducer: searchReducer,
+//            environment: self.environment
+//        )
+//    }
 }
+
+private let mockUsers = [
+    User(id: 1, name: "ABC", avatarUrlString: nil, repoCount: 1),
+    User(id: 2, name: "BCD", avatarUrlString: nil, repoCount: 22),
+    User(id: 3, name: "CDE", avatarUrlString: nil, repoCount: 333)
+]

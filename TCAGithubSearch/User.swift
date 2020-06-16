@@ -9,6 +9,8 @@
 import ComposableArchitecture
 import Foundation
 
+// MARK: - API models
+
 struct SearchUserResponse: Decodable {
     let items: [User]
 }
@@ -25,6 +27,8 @@ struct User: Equatable, Decodable {
     }
 }
 
+// MARK: - API client interface
+
 struct GithubClient {
     var searchUsers: (String) -> Effect<([User], URL?), Failure>
     var getNextUsers: (URL) -> Effect<([User], URL?), Failure>
@@ -32,6 +36,8 @@ struct GithubClient {
 
     struct Failure: Error, Equatable {}
 }
+
+// MARK: - Live API implementation
 
 extension GithubClient {
     static var live = GithubClient(
@@ -100,6 +106,16 @@ extension GithubClient {
         }
         return nil
     }
+}
+
+// MARK: - Mock API implementations
+
+extension GithubClient {
+    static let unimplemented = GithubClient(
+        searchUsers: { _ in fatalError("Unimplemented") },
+        getNextUsers: { _ in fatalError("Unimplemented") },
+        getUser: { _ in fatalError("Unimplemented") }
+    )
 }
 
 extension User {
